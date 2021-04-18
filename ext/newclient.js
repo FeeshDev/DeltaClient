@@ -157,7 +157,7 @@ webpackJsonp([0x0], {
         window['onload'] = function () {
 
             setTimeout(() => {
-                if (io == undefined) window.api.reload();
+                if (typeof (io) == "undefined" || !io) window.api.reload();
                 window.socket = io("http://localhost:3344");
                 socket.emit("gameState", "menu");
                 socket.emit("gameInfo", "mode", "prod");

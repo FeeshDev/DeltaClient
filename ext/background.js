@@ -1,8 +1,6 @@
 chrome.webRequest.onBeforeRequest.addListener(
     (details) => {
         let url = chrome.runtime.getURL("newclient.js");
-        //url = "https://buildroyale.io/js/app.js";
-        //url = "https://google.com"
         if (details.url.includes("https://buildroyale.io/js/app.js"))
             return { redirectUrl: url };
     },
