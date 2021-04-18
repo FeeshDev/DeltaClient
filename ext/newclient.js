@@ -8041,6 +8041,7 @@ webpackJsonp([0x0], {
                     _0x4718e9();
                     _0x2772aa();
                     localStorage.deltaGameState = 'menu';
+                    if (typeof(socket) != "undefined") socket.emit("gameState", "menu")
                     if (_0x3dc783 && !gameWrapper['enabled']) {
                         try {
                             aiptag['cmd']['display']['push'](function () {
@@ -9805,7 +9806,6 @@ webpackJsonp([0x0], {
                 }
                 _0x411a00['ws'] = new _0x411a00['socket'](_0x5d635b, _0x411a00['messageEvent'], _0x5366d1);
                 _0x411a00['ws']['binaryType'] = 'arraybuffer';
-                socket.emit("gameState", "menu");
             };
             _0x411a00['hasEnvs'] = ![];
             _0x411a00['serverDetails'] = {
