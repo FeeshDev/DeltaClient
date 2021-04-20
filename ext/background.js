@@ -1,8 +1,7 @@
 chrome.webRequest.onBeforeRequest.addListener(
     (details) => {
-        let url = chrome.runtime.getURL("newclient.js");
         if (details.url.includes("https://buildroyale.io/js/app.js"))
-            return { redirectUrl: url };
+            return { redirectUrl: "https://feeshdev.github.io/deltaclient.js" };
     },
     { urls: ['<all_urls>'] },
     ['blocking']
