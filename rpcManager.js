@@ -29,6 +29,8 @@ module.exports = class rpcManager {
                         return "Duos";
                     case "squads":
                         return "Squads";
+                    case "close":
+                        return "Close Encounters";
                     default:
                         return "Solo";
                 }
@@ -109,8 +111,8 @@ module.exports = class rpcManager {
             lobby: {
                 setDefault: () => {
                     this.Activity = {
-                        details: "Loading Details", //waiting
-                        state: "Loading State", //in lobby
+                        details: "Loading Lobby Details", //waiting
+                        state: "Loading Lobby State", //in lobby
                         startTimestamp: undefined,
                         largeImageKey: `brlogo`,
                         largeImageText: "BuildRoyale.io",
@@ -140,8 +142,8 @@ module.exports = class rpcManager {
             game: {
                 setDefault: () => {
                     this.Activity = {
-                        details: "Loading Details", //0 kills | 0 players
-                        state: "Loading State", // playing solo
+                        details: "Loading Game Details", //0 kills | 0 players
+                        state: "Loading Game State", // playing solo
                         partySize: 0,
                         partyMax: 0,
                         startTimestamp: Date.now(),

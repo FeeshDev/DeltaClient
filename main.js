@@ -63,9 +63,14 @@ client.on('ready', () => {
     io.on("connection", (socket) => {
         socket.on("gameState", (state) => {
             if (state == RPCManager.gameInfo.state) return;
-            if (RPCManager.gameInfo.state == "spec" && state != "menu") return;
-            RPCManager.gameInfo.state = state;
-            RPCManager.states[RPCManager.gameInfo.state].setDefault();
+            if (RPCManager.gameInfo.state == "spec" && state == "menu") {
+                RPCManager.gameInfo.state = "menu";
+                RPCManager.states[RPCManager.gameInfo.state].setDefault();
+                RPCManager.states[RPCManager.gameInfo.state].updateState();
+            } else {
+                RPCManager.gameInfo.state = state;
+                RPCManager.states[RPCManager.gameInfo.state].setDefault();
+            }
         });
         socket.on("gameInfo", (key, value) => {
             RPCManager.gameInfo[key] = value;

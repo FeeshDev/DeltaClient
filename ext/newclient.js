@@ -1,3 +1,4 @@
+//! CHANGES
 console.log("Delta Client Injected!")
 window.killFeed = [];
 window.killFeedText = () => {
@@ -13,6 +14,8 @@ window.getMaxModePlayers = (mode) => {
             return 2;
         case "squads":
             return 4;
+        case "close":
+            return 1;
         default:
             return 1;
     }
@@ -174,7 +177,7 @@ webpackJsonp([0x0], {
             document['getElementById']('disableAdsButton')['style']['display'] = _0x442d17 ? '' : 'none';
         }
         window['onload'] = function () {
-
+            //! CHANGES
             setTimeout(() => {
                 if (typeof (io) == "undefined" || !io) window.api.reload();
                 window.socket = io("http://localhost:3344");
@@ -237,7 +240,8 @@ webpackJsonp([0x0], {
             if (!_0x5ab57f) {
                 _0x46c82c = document['createElement']('script');
                 _0x46c82c['src'] = '//api.adinplay.com/libs/aiptag/pub/ORP/buildroyale.io/tag.min.js';
-                document['head']['appendChild'](_0x46c82c);
+                //! CHANGES
+                //document['head']['appendChild'](_0x46c82c);
             }
             var _0x2c83b5 = document['createElement']('script');
             _0x2c83b5['src'] = 'https://www.googletagservices.com/tag/js/gpt.js';
@@ -549,8 +553,9 @@ webpackJsonp([0x0], {
                 if (_0x4cd046 == 0x0) {
                     try {
                         document['getElementById']('playlist' + _0x4cd046)['style']['filter'] = 'drop-shadow(0px 0px 3px #ccc)';
-                        if (parseInt(localStorage.deltaPartySize) <= getMaxModePlayers(_0x35cfe3[_0x3192cf])) socket.emit("gameInfo", "mode", _0x35cfe3[_0x3192cf]);
-                        localStorage.deltaMode = _0x35cfe3[_0x3192cf];
+                        //! CHANGES
+                        if ((parseInt(localStorage.deltaPartySize) <= getMaxModePlayers(_0x5898ef[_0x4cd046])) && (typeof (socket) !== "undefined")) socket.emit("gameInfo", "mode", _0x5898ef[_0x4cd046]);
+                        localStorage.deltaMode = _0x5898ef[_0x4cd046];
                     } catch (_0x5e9944) {
                         console['log']('STYLE 1');
                     }
@@ -564,8 +569,9 @@ webpackJsonp([0x0], {
                             }
                             _0x1556d9['target']['style']['filter'] = 'drop-shadow(0px 0px 3px #ccc)';
                             _0x551b49 = 'build_' + _0x5898ef[_0x2ec789];
-                            if (parseInt(localStorage.deltaPartySize) <= getMaxModePlayers(_0x35cfe3[_0x3192cf])) socket.emit("gameInfo", "mode", _0x35cfe3[_0x256948]);
-                            localStorage.deltaMode = _0x35cfe3[_0x256948];
+                            //! CHANGES
+                            if ((parseInt(localStorage.deltaPartySize) <= getMaxModePlayers(_0x5898ef[_0x2ec789])) && (typeof (socket) !== "undefined")) socket.emit("gameInfo", "mode", _0x5898ef[_0x2ec789]);
+                            localStorage.deltaMode = _0x5898ef[_0x2ec789];
                             if (_0x446ded != null) {
                                 _0x20a2a5['push']({
                                     'type': 'setqueue',
@@ -619,11 +625,12 @@ webpackJsonp([0x0], {
                         return;
                     }
                     alert(_0x579fce['message']);
-                    if (_0x4739ea['message'] == "Error: Party does not exist") {
+                    //! CHANGES
+                    if (_0x579fce['message'] == "Error: Party does not exist") {
                         localStorage.deltaPartySize = 0;
                         localStorage.deltaGameState = "menu";
-                        socket.emit("gameInfo", "partysize", 0);
                         socket.emit("gameState", "menu");
+                        socket.emit("gameInfo", "partysize", 0);
                     }
                     if (_0x446ded != null) {
                         console['log']('Closing Error');
@@ -635,8 +642,9 @@ webpackJsonp([0x0], {
                     if (_0x3cbcea['m'] === undefined) {
                         return;
                     }
-                    if (localStorage.deltaPartySize != _0x54f464.m.length) socket.emit("gameInfo", "partysize", _0x54f464.m.length);
-                    localStorage.deltaPartySize = _0x54f464.m.length;
+                    //! CHANGES
+                    if ((localStorage.deltaPartySize != _0x3cbcea.m.length) && (typeof (socket) !== "undefined")) socket.emit("gameInfo", "partysize", _0x3cbcea.m.length);
+                    localStorage.deltaPartySize = _0x3cbcea.m.length;
                     for (var _0x2e37ca = 0x0; _0x2e37ca < 0x4; _0x2e37ca++) {
                         document['getElementById']('partyname' + _0x2e37ca)['innerHTML'] = '';
                     }
@@ -676,10 +684,11 @@ webpackJsonp([0x0], {
                     }
                     var _0x473036 = Math['max'](_0x5898ef['indexOf'](_0x3cbcea['q']['substr'](0x6)), 0x0);
                     document['getElementById']('playlist' + _0x473036)['style']['filter'] = 'drop-shadow(0px 0px 3px #ccc)';
+                    //! CHANGES
                     if (localStorage.deltaGameState == "menu") {
-                        if (parseInt(localStorage.deltaPartySize) <= getMaxModePlayers(_0x35cfe3[_0x330b00])) socket.emit("gameInfo", "mode", _0x35cfe3[_0x330b00]);
+                        if ((parseInt(localStorage.deltaPartySize) <= getMaxModePlayers(_0x5898ef[_0x473036])) && (typeof (socket) !== "undefined")) socket.emit("gameInfo", "mode", _0x5898ef[_0x473036]);
                     }
-                    localStorage.deltaMode = _0x35cfe3[_0x330b00];
+                    localStorage.deltaMode = _0x5898ef[_0x473036];
                     if (_0x3cbcea['u'] != 0x0) {
                         _0x2c2779('partyleader');
                         _0x29cc68 = ![];
@@ -887,8 +896,9 @@ webpackJsonp([0x0], {
                         _0x446ded = null;
                         window['history']['replaceState'](null, '', '/');
                     }
+                    //! CHANGES
                     localStorage.deltaPartySize = 0;
-                    socket.emit("gameInfo", "partysize", 0);
+                    if (typeof (socket) !== "undefined") socket.emit("gameInfo", "partysize", 0);
                     _0x165e4e('partyleader');
                     _0x2c2779('scene0');
                     _0x165e4e('scene1');
@@ -1491,18 +1501,18 @@ webpackJsonp([0x0], {
                 109: '-',
                 110: '.',
                 111: '/',
-                112: 'f1',
-                113: 'f2',
-                114: 'f3',
-                115: 'f4',
-                116: 'f5',
-                117: 'f6',
-                118: 'f7',
-                119: 'f8',
-                120: 'f9',
-                121: 'f10',
-                122: 'f11',
-                123: 'f12',
+                112: 'F1',
+                113: 'F2',
+                114: 'F3',
+                115: 'F4',
+                116: 'F5',
+                117: 'F6',
+                118: 'F7',
+                119: 'F8',
+                120: 'F9',
+                121: 'F10',
+                122: 'F11',
+                123: 'F12',
                 144: 'Num Lock',
                 145: 'Scroll Lock',
                 186: ';',
@@ -1517,13 +1527,15 @@ webpackJsonp([0x0], {
                 221: ']',
                 222: '\''
             };
-            var _0x5f0f7e = ['Pickup 1', 'Pickup 2', 'Jump', 'Build', 'Reload', 'Inventory', 'Map', 'Ask For Ammo', 'ADS', 'Fire', 'Weapon Slot 1', 'Weapon Slot 2', 'Weapon Slot 3', 'Weapon Slot 4', 'Weapon Slot 5', 'Weapon Slot 6', 'Move Up', 'Move Down', 'Move Left', 'Move Right', 'Sprint'];
+            //! CHANGES
+            var _0x5f0f7e = ['Pickup 1', 'Pickup 2', 'Jump', 'Build', 'Reload', 'Inventory', 'Map', 'Ask For Ammo', 'ADS', 'Fire', 'Weapon Slot 1', 'Weapon Slot 2', 'Weapon Slot 3', 'Weapon Slot 4', 'Weapon Slot 5', 'Weapon Slot 6', 'Move Up', 'Move Down', 'Move Left', 'Move Right', 'Sprint', 'Reload Page', 'Hide Minimap'];
             var _0x177111 = _0x591c01(_0x3ba0be);
             var _0x435a79 = {};
             for (var _0x4cd046 = 0x0; _0x4cd046 < _0x177111['length']; _0x4cd046++) {
                 _0x435a79[_0x3ba0be[_0x177111[_0x4cd046]]] = _0x177111[_0x4cd046];
             }
-            var _0x452198 = ['E', 'F', 'Space', 'Q', 'R', 'Tab', 'M', 'B', 'C', 'V', '1', '2', '3', '4', '5', '6', 'W', 'S', 'A', 'D', 'Shift'];
+            //! CHANGES
+            var _0x452198 = ['E', 'F', 'Space', 'Q', 'R', 'Tab', 'M', 'B', 'C', 'V', '1', '2', '3', '4', '5', '6', 'W', 'S', 'A', 'D', 'Shift', 'F5', 'O'];
             for (var _0x4cd046 = 0x0; _0x4cd046 < _0x452198['length']; _0x4cd046++) {
                 _0x452198[_0x4cd046] = _0x435a79[_0x452198[_0x4cd046]['toString']()];
             }
@@ -2176,6 +2188,12 @@ webpackJsonp([0x0], {
                 _0x44f6c3['changedKeys'] = [];
                 function _0x1b138e(_0x289f9b) {
                     var _0x2a66eb = ![];
+
+                    //! CHANGES
+                    if (_0x289f9b['keyCode'] == _0x43a009('Reload Page')) {
+                        window.api.reload();
+                    }
+
                     if (_0x289f9b['keyCode'] == _0x43a009('Move Left')) {
                         if (!_0x44f6c3['left']) {
                             _0x2a66eb = !![];
@@ -4560,8 +4578,9 @@ webpackJsonp([0x0], {
                     _0x5a7ac4['elims'] = _0x5cca29['elims'];
                     if (_0x5a7ac4 == _0x1e6a3f['me']) {
                         _0x2db1b4['text'] = _0x5a7ac4['elims'];
-                        if (localStorage.deltaElims != _0x3784be['elims']) socket.emit("gameInfo", "elims", _0x3784be['elims']);
-                        localStorage.deltaElims = _0x3784be['elims'];
+                        //! CHANGES
+                        if ((localStorage.deltaElims != _0x5a7ac4['elims']) && (typeof (socket) !== "undefined")) socket.emit("gameInfo", "elims", _0x5a7ac4['elims']);
+                        localStorage.deltaElims = _0x5a7ac4['elims'];
                     }
                 }
                 if (_0x5a7ac4['unsetSteadying']) {
@@ -7067,8 +7086,11 @@ webpackJsonp([0x0], {
                 }
                 var _0x177752 = ![];
                 if (_0x38b533 == 'waiting') {
-                    if (localStorage.deltaGameState !== 'game') socket.emit("gameState", "game");
-                    localStorage.deltaGameState = 'game';
+                    //! CHANGES
+                    if ((localStorage.deltaGameState !== 'menu') && (localStorage.deltaGameState !== 'game') && (typeof (socket) !== "undefined")) {
+                        socket.emit("gameState", "game");
+                        localStorage.deltaGameState = 'game';
+                    }
                     _0x1b750b['text'] = 'Storm is closing in ' + _0x20bc3e + ' seconds!';
                     if (_0x20bc3e <= 0xa && _0x20bc3e > 0x5) {
                         _0x177752 = !![];
@@ -7078,14 +7100,15 @@ webpackJsonp([0x0], {
                     }
                 }
                 if (_0x38b533 == 'lobby') {
-                    if (localStorage.deltaGameState !== 'lobby') socket.emit("gameState", "lobby");
-                    localStorage.deltaGameState = 'lobby';
                     _0x177752 = !![];
                     if (_0x20bc3e < 0x0) {
                         _0x1b750b['text'] = 'Waiting for players...';
                         _0x1b750b['opacity'] = 0x1;
                     } else {
                         _0x1b750b['text'] = 'Match starting in ' + _0x20bc3e + ' seconds';
+                        //! CHANGES
+                        if (localStorage.deltaGameState !== 'lobby' && (typeof (socket) !== "undefined")) socket.emit("gameState", "lobby");
+                        localStorage.deltaGameState = 'lobby';
                     }
                 }
                 _0x42646b();
@@ -8127,6 +8150,7 @@ webpackJsonp([0x0], {
                     _0x1e6a3f['ws']['close']();
                     _0x4795a4();
                     _0x1f8ff4();
+                    //! CHANGES
                     localStorage.deltaGameState = 'menu';
                     if (typeof (socket) != "undefined") socket.emit("gameState", "menu");
                     if (_0x2a9ffd && !gameWrapper['enabled'] && !_0x5ab57f) {
@@ -8178,8 +8202,9 @@ webpackJsonp([0x0], {
             _0x1e6a3f['addPacketType']('players', function (_0x52faee) {
                 if (_0x52faee['players'] !== undefined) {
                     _0x4918d8['text'] = _0x52faee['players'];
-                    if (localStorage.deltaPlayers != _0x3cecc2['players']) socket.emit("gameInfo", "players", _0x3cecc2['players']);
-                    localStorage.deltaPlayers = _0x3cecc2['players'];
+                    //! CHANGES
+                    if ((localStorage.deltaPlayers != _0x52faee['players']) && (typeof (socket) !== "undefined")) socket.emit("gameInfo", "players", _0x52faee['players']);
+                    localStorage.deltaPlayers = _0x52faee['players'];
                 }
                 if (_0x52faee['infect'] !== undefined) {
                     _0x2173be['text'] = _0x52faee['infect'];
@@ -8215,7 +8240,8 @@ webpackJsonp([0x0], {
                 }
             });
             _0x1e6a3f['addPacketType']('death', function (_0x4a660a) {
-                socket.emit("gameState", "spec");
+                //! CHANGES
+                if (typeof (socket) !== "undefined") socket.emit("gameState", "spec");
 
                 if (_0x2a9ffd && !gameWrapper['enabled']) {
                     try {
@@ -8309,11 +8335,13 @@ webpackJsonp([0x0], {
                     _0x38b533 = _0x37ebd1['state'];
                     if (_0x38b533 == 'waiting' || _0x38b533 == 'lobby') {
                         _0x3e303f['image'] = _0x282ecd('waitingIcon');
-                        socket.emit("gameInfo", "stormstate", "waiting");
+                        //! CHANGES
+                        if (typeof (socket) !== "undefined") socket.emit("gameInfo", "stormstate", "waiting");
                         localStorage.deltaStormState = 'waiting';
                     } else if (_0x38b533 == 'moving') {
                         _0x3e303f['image'] = _0x282ecd('movingIcon');
-                        socket.emit("gameInfo", "stormstate", "moving");
+                        //! CHANGES
+                        if (typeof (socket) !== "undefined") socket.emit("gameInfo", "stormstate", "moving");
                         localStorage.deltaStormState = 'moving';
                     }
                 }
@@ -8324,8 +8352,9 @@ webpackJsonp([0x0], {
                         _0xc43186 += '0';
                     _0xc43186 += Math['max'](_0x20bc3e, 0x0);
                     _0x4a27d9['text'] = _0xc43186;
-                    if (localStorage.deltaStormTime != _0x561f4d) socket.emit("gameInfo", "time", _0x561f4d);
-                    localStorage.deltaStormTime = _0x561f4d;
+                    //! CHANGES
+                    if ((localStorage.deltaStormTime != _0xc43186) && (typeof (socket) !== "undefined")) socket.emit("gameInfo", "time", _0xc43186);
+                    localStorage.deltaStormTime = _0xc43186;
                 }
                 if (_0x37ebd1['circle'] !== undefined) {
                     if (_0x38b533 == 'moving') {
@@ -8343,7 +8372,8 @@ webpackJsonp([0x0], {
             });
             _0x1e6a3f['addPacketType']('forceSpectate', function (_0x2d961d) {
                 console['log']('Forcing spectate');
-                socket.emit("gameState", "spec");
+                //! CHANGES
+                if (typeof (socket) !== "undefined") socket.emit("gameState", "spec");
                 _0x553bd8 = !![];
                 _0x7bebb1['opacity'] = 0x0;
             });

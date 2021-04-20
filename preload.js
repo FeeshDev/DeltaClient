@@ -16,6 +16,7 @@ window.addEventListener("keyup", function (e) {
     }
 });
 
+/*
 window.addEventListener("keydown", function (e) {
     let reloadkey = 116;
     let binds = JSON.parse(localStorage.binds);
@@ -24,6 +25,7 @@ window.addEventListener("keydown", function (e) {
         ipcRenderer.invoke("reload");
     }
 });
+*/
 
 window.onload = () => {
     let script = document.createElement("script");
