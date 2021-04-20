@@ -180,33 +180,4 @@ module.exports = class rpcManager {
     setActivityField = (key, value) => {
         this.Activity[key] = value;
     }
-
-    /*
-    inGame = () => {
-        this.Activity = {
-            details: `In game`,
-            state: `0 kills | 0 players`,
-            startTimestamp: Date.now(),
-            largeImageKey: `brlogo`,
-            largeImageText: "Delta Client",
-            smallImageKey: undefined,
-            smallImageText: undefined,
-            instance: false
-        }
-        this.updateActivity();
-    }
-    */
 }
-
-/*
-ipcMain.handle("updateTime", async (bullshit, value) => {
-    ActivityManager.gameInfo.time = value;
-    if (ActivityManager.gameInfo.state !== 'menu')
-        ActivityManager.updateActivityField("state", `Waiting for players ${ActivityManager.gameInfo.time} | ${ActivityManager.gameInfo.players} players`);
-})
-
-ipcMain.handle("updatePlayers", async (bullshit, value) => {
-    ActivityManager.gameInfo.players = value;
-    ActivityManager.updateActivityField("state", `Waiting for players ${ActivityManager.gameInfo.time} | ${ActivityManager.gameInfo.players} players`);
-})
-*/
