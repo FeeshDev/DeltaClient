@@ -33,7 +33,7 @@ function createWindow() {
 
     setTimeout(() => {
         mainWindow.loadURL('https://buildroyale.io/');
-    }, 10);
+    }, 100);
 }
 
 const dialogOptions = {
