@@ -4,6 +4,12 @@ chrome.webRequest.onBeforeRequest.addListener(
         let url = devEnv ? chrome.runtime.getURL("newclient.js") : "https://feeshdev.github.io/deltaclient.js";
         if (details.url.includes("https://buildroyale.io/js/app.js"))
             return { redirectUrl: url };
+
+        //https://feeshdev.github.io/brWrapRenderer/buildart/lmg.png
+        if (details.url.includes("https://buildroyale.io/buildart/logo.png")) return { redirectUrl: chrome.runtime.getURL("logo.png") };
+        if (details.url.includes("https://buildroyale.io/buildart/greensheet.png")) return { redirectUrl: chrome.runtime.getURL("greensheet.png") };
+        if (details.url.includes("https://buildroyale.io/buildart/redsheet.png")) return { redirectUrl: chrome.runtime.getURL("redsheet.png") };
+        if (details.url.includes("https://buildroyale.io/buildart/lmg.png")) return { redirectUrl: "https://feeshdev.github.io/brWrapRenderer/buildart/lmg.png" };
     },
     { urls: ['<all_urls>'] },
     ['blocking']

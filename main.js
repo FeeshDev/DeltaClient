@@ -31,6 +31,10 @@ function createWindow() {
         titleBarStyle: 'hidden'
     })
 
+    mainWindow.removeMenu();
+
+    mainWindow.webContents.openDevTools();
+
     setTimeout(() => {
         mainWindow.loadURL('https://buildroyale.io/');
     }, 100);
@@ -90,8 +94,15 @@ function main() {
     ipcMain.handle("reload", async () => {
         mainWindow.webContents.reload()
     });
+    ipcMain.handle("console", async () => {
+        mainWindow.webContents.isDevToolsOpened() ? mainWindow.webContents.closeDevTools() : mainWindow.webContents.openDevTools();
+    });
+    ipcMain.handle("fullscreen", async () => {
+        mainWindow.fullScreen = !mainWindow.fullScreen;
+    });
 
 
+    //mainWindow.fullScreen = true;
     session.defaultSession.loadExtension(path.resolve(__dirname, "ext"));
     createWindow();
     app.on('activate', () => {

@@ -3,6 +3,8 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld('api', {
     closeDialog: () => ipcRenderer.invoke("closeDialog"),
     reload: () => ipcRenderer.invoke("reload"),
+    console: () => ipcRenderer.invoke("console"),
+    fullscreen: () => ipcRenderer.invoke("fullscreen"),
     sendLog: (value) => ipcRenderer.invoke("sendLog", value)
 });
 
