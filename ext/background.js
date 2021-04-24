@@ -1,6 +1,6 @@
 chrome.webRequest.onBeforeRequest.addListener(
     (details) => {
-        let devEnv = false;
+        let devEnv = true;
         let url = devEnv ? chrome.runtime.getURL("newclient.js") : "https://feeshdev.github.io/deltaclient.js";
         if (details.url.includes("https://buildroyale.io/js/app.js"))
             return { redirectUrl: url };
