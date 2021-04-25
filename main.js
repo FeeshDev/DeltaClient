@@ -33,11 +33,6 @@ function createWindow() {
 
     mainWindow.removeMenu();
 
-    mainWindow.webContents.on('new-window', function(e, url) {
-        e.preventDefault();
-        require('electron').shell.openExternal(url);
-      });
-
     /*
     setTimeout(() => {
         mainWindow.loadURL('https://buildroyale.io/');
