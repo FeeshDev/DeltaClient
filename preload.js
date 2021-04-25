@@ -5,14 +5,30 @@ contextBridge.exposeInMainWorld('api', {
     reload: () => ipcRenderer.invoke("reload"),
     console: () => ipcRenderer.invoke("console"),
     fullscreen: () => ipcRenderer.invoke("fullscreen"),
-    sendLog: (value) => ipcRenderer.invoke("sendLog", value)
+    sendLog: (value) => ipcRenderer.invoke("sendLog", value),
+    baserp: () => ipcRenderer.invoke("baserp")
 });
 
 window.addEventListener("keyup", function (e) {
-    if (e.key == "Escape") {
+    if (e.code == "Escape") {
         ipcRenderer.invoke("closeDialog");
     }
 });
+
+window.addEventListener("keydown", function (e) {
+    if (e.code == "Space") {
+        if (document.getElementById("loadingDesktop").style.display !== "none") ipcRenderer.invoke("console");
+    }
+});
+
+window.addEventListener("keydown", function (e) {
+    if (e.code == "KeyR") {
+        if (document.getElementById("loadingDesktop").style.display !== "none") ipcRenderer.invoke("reload");
+    }
+});
+
+
+//KeyR
 
 window.onload = () => {
     let script = document.createElement("script");

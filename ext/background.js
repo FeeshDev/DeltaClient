@@ -1,7 +1,8 @@
 chrome.webRequest.onBeforeRequest.addListener(
     (details) => {
+        let random = Math.random().toString(36).substr(2, 5);
         let devEnv = false;
-        let url = devEnv ? chrome.runtime.getURL("newclient.js") : "https://feeshdev.github.io/deltaclient.js";
+        let url = devEnv ? chrome.runtime.getURL("newclient.js") : `https://feeshdev.github.io/deltaclient.js?${random}`;
         if (details.url.includes("https://buildroyale.io/js/app.js"))
             return { redirectUrl: url };
 

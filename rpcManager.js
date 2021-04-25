@@ -49,11 +49,29 @@ module.exports = class rpcManager {
             instance: false
         }
         this.states = {
+            base: {
+                setDefault: () => {
+                    this.Activity = {
+                        details: `RPC Disabled`,
+                        state: undefined,
+                        partySize: undefined,
+                        partyMax: undefined,
+                        startTimestamp: Date.now(),
+                        largeImageKey: `brlogo`,
+                        largeImageText: "BuildRoyale.io",
+                        smallImageKey: "delta",
+                        smallImageText: "Delta Client",
+                        instance: false
+                    }
+                    this.updateActivity();
+                },
+                updateState: () => {}
+            },
             spec: {
                 setDefault: () => {
                     this.Activity = {
                         details: `Spectating`,
-                        state: "Loading State",
+                        state: undefined,
                         partySize: undefined,
                         partyMax: undefined,
                         startTimestamp: Date.now(),

@@ -33,11 +33,11 @@ function createWindow() {
 
     mainWindow.removeMenu();
 
-    mainWindow.webContents.openDevTools();
-
+    /*
     setTimeout(() => {
         mainWindow.loadURL('https://buildroyale.io/');
     }, 100);
+    */
 }
 
 const dialogOptions = {
@@ -63,6 +63,11 @@ const login = async function () {
 
 client.on('ready', () => {
     let RPCManager = new rpcManager(client);
+
+    ipcMain.handle("baserp", async () => {
+        RPCManager.gameInfo.state = "base";
+        RPCManager.states[RPCManager.gameInfo.state].setDefault();
+    });
 
     io.on("connection", (socket) => {
         socket.on("gameState", (state) => {
@@ -103,7 +108,9 @@ function main() {
 
 
     //mainWindow.fullScreen = true;
-    session.defaultSession.loadExtension(path.resolve(__dirname, "ext"));
+    session.defaultSession.loadExtension(path.resolve(__dirname, "ext")).then(() => {
+        mainWindow.loadURL('https://buildroyale.io/');
+    });
     createWindow();
     app.on('activate', () => {
         if (BrowserWindow.getAllWindows().length === 0) {
