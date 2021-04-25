@@ -232,7 +232,7 @@ webpackJsonp([0x0], {
             mainp.style.overflowY = "scroll";
             mainp.innerHTML = ""+
             "Delta Client v1.3.0 - Stability Update<br>"+
-            "> Download the new installer <a target='_blank' href='https://google.com'>here</a><br>"+
+            "> Download the new installer <a target='_blank' href='https://github.com/FeeshDev/DeltaClient/releases/tag/1.3.0'>here</a><br>"+
             "> Added warnings for wrap manager<br>"+
             "> Added extra errors checks for wrap manager<br>"+
             "> Made Dynamic Presence toggleable<br>"+
