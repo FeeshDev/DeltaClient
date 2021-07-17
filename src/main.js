@@ -1,9 +1,14 @@
 const { ipcMain, dialog, globalShortcut, app, BrowserWindow, session } = require('electron');
+const { autoUpdater } = require("electron-updater");
 const log = require('electron-log');
 const isDev = require('electron-is-dev');
 const path = require('path');
 const rpcManager = require("./rpcManager");
 const fs = require("fs-extra");
+const { defaultIcon, closeDialog, notify } = require("./reusable.js");
+const package = require("../package.json");
+
+const packageName = process.env.npm_package_name || "delta-client";
 
 let mainWindow;
 function createWindow() {
@@ -11,7 +16,7 @@ function createWindow() {
         width: 800,
         height: 600,
         title: "Delta Client",
-        icon: "./build/icon.ico",
+        icon: defaultIcon,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -24,25 +29,81 @@ function createWindow() {
     })
 
     mainWindow.removeMenu();
-
-    /*
-    setTimeout(() => {
-        mainWindow.loadURL('https://buildroyale.io/');
-    }, 100);
-    */
 }
 
-const dialogOptions = {
-    type: 'none',
-    title: "Delta Client",
-    buttons: ['OK', 'Cancel'],
-    icon: "./build/icon.ico",
-    message: 'Would you like to close Delta?'
-};
 ipcMain.handle("closeDialog", async () => {
-    test = await dialog.showMessageBox(dialogOptions);
+    test = await dialog.showMessageBox(closeDialog);
     if (test.response === 0) app.quit();
 });
+
+function main() {
+    autoUpdater.checkForUpdatesAndNotify();
+    globalShortcut.register('F5', () => {
+        if (!mainWindow.isFocused()) return;
+        mainWindow.webContents.reload();
+    });
+    globalShortcut.register('F11', () => {
+        if (!mainWindow.isFocused()) return;
+        mainWindow.fullScreen = !mainWindow.fullScreen;
+    });
+    ipcMain.handle("console", async () => {
+        mainWindow.webContents.isDevToolsOpened() ? mainWindow.webContents.closeDevTools() : mainWindow.webContents.openDevTools();
+    });
+
+    let extPath = "";
+    if (isDev) extPath = path.resolve(__dirname, "..", "extension")
+    else extPath = path.resolve(__dirname, "..", "..", "app.asar.unpacked", "extension")
+    log.info(`Extension location: '${extPath}'`);
+    session.defaultSession.loadExtension(extPath).then(() => {
+        mainWindow.loadURL('https://buildroyale.io/');
+    });
+
+    notify(`Delta v${package.version} is running!`);
+
+    createWindow();
+    app.on('activate', () => {
+        if (BrowserWindow.getAllWindows().length === 0) {
+            createWindow();
+        }
+    })
+}
+
+
+/*
+#####################################
+        autoUpdater
+#####################################
+*/
+
+autoUpdater.on('checking-for-update', async () => {
+    notify("Checking for update!", "Feel free to ignore this, it's just a background check.");
+    var pendingPath = ""; //* Original path
+
+    if (process.platform === "win32") pendingPath = path.resolve(process.env.LOCALAPPDATA, `${packageName}-updater/pending`); //* Windows
+    else pendingPath = path.resolve(process.env.HOME, `${packageName}-updater/pending`); //* Any other platform
+    //else if (process.platform === "linux") pendingPath = path.resolve(process.env.HOME, `${packageName}-updater/pending`);  //* may need to use this
+    //else if (process.platform === "darwin") pendingPath = path.resolve(process.env.HOME, `${packageName}-updater/pending`); //* may need to use this
+
+    try {
+        await fs.remove(pendingPath) //! Await removal
+    } catch (err) {
+        console.error(err)
+    }
+});
+
+autoUpdater.on('update-available', (info) => {
+    notify("Update available!", "Downloading update... please do not close Delta Client.");
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+    notify("Update downloaded!", "You can now restart the app to see the new version.");
+});
+
+/*
+#####################################
+        Usually not edited
+#####################################
+*/
 
 const { Client } = require('discord-rpc');
 const client = new Client({ transport: 'ipc' });
@@ -60,41 +121,11 @@ client.on('ready', () => {
         RPCManager.gameInfo.state = "base";
         RPCManager.states[RPCManager.gameInfo.state].setDefault();
     });
-})
+});
 
 ipcMain.handle("sendLog", async (bullshit, value) => {
     console.log(value)
 });
-
-function main() {
-    globalShortcut.register('F5', () => {
-        if (!mainWindow.isFocused()) return;
-        mainWindow.webContents.reload();
-    });
-    globalShortcut.register('F11', () => {
-        if (!mainWindow.isFocused()) return;
-        mainWindow.fullScreen = !mainWindow.fullScreen;
-    });
-    ipcMain.handle("console", async () => {
-        mainWindow.webContents.isDevToolsOpened() ? mainWindow.webContents.closeDevTools() : mainWindow.webContents.openDevTools();
-    });
-
-    let extPath = "";
-    if (isDev) extPath = path.resolve(__dirname, "..", "extension")
-    else extPath = path.resolve(__dirname, "..", "..", "app.asar.unpacked", "extension")
-
-    log.info(`Extension location: '${extPath}'`);
-
-    session.defaultSession.loadExtension(extPath).then(() => {
-        mainWindow.loadURL('https://buildroyale.io/');
-    });
-    createWindow();
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
-        }
-    })
-}
 
 app.whenReady().then(main);
 
