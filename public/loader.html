@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <img src="../build/updateSplash.png">
+    <div class="main">
+        <h3 id="update">Checking for updates...</h3>
+        <div id="downloadBarHolder">
+            <div id="downloadBar"></div>
+        </div>
+    </div>
+    <style>
+        * {
+            padding: 0px;
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .main {
+            display: flex;
+            flex-direction: column;
+            top: 80%;
+            left: 50%;
+            transform: translateX(-50%);
+            position: absolute;
+            z-index: 2;
+            font-size: 40px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #update {
+            font-family: 'Chewy', cursive;
+            font-weight: 100;
+            text-shadow:
+                -1px -1px 0 #000,
+                1px -1px 0 #000,
+                -1px 1px 0 #000,
+                1px 1px 0 #000;
+            color: #EEEEEE;
+        }
+
+        #downloadBarHolder {
+            background-color: #0F5FC1;
+            width: 400px;
+            height: 20px;
+            border-radius: 10px;
+        }
+
+        #downloadBar {
+            overflow: hidden;
+            background-color: #4B87D1;
+            width: 50%;
+            height: inherit;
+            border-radius: 10px;
+        }
+    </style>
+    <script>
+        const { ipcRenderer } = require("electron");
+        const text_check = document.getElementsByClassName("text_check")
+
+        let checking = true;
+
+        window.downloadStatus = "";
+        let index = 0;
+        let updateElem = document.getElementById("update");
+
+        const changeStatus = (text) => {
+            checking = false;
+            updateElem.textContent = text;
+        }
+
+        setInterval(() => {
+            if (!checking) return;
+            updateElem.textContent = `Checking for updates${".".repeat(index % 4)}${downloadStatus}`;
+            index++;
+        }, 800);
+
+        ipcRenderer.on("upd-available", () => {
+        });
+
+        ipcRenderer.on("upd-not-available", () => {
+            changeStatus("Launching client...");
+            ipcRenderer.send("launchClient");
+        });
+
+        ipcRenderer.on("upd-downloaded", () => {
+            changeStatus("update downloaded");
+        });
+
+        ipcRenderer.on("upd-down-progress", (progress) => {
+
+        });
+
+        ipcRenderer.on("error", () => {
+            changeStatus("An error has occured.");
+        });
+    </script>
+</body>
+
+</html>

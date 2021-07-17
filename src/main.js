@@ -5,7 +5,7 @@ const isDev = require('electron-is-dev');
 const path = require('path');
 const rpcManager = require("./rpcManager");
 const fs = require("fs-extra");
-const { defaultIcon, closeDialog, notify } = require("./reusable.js");
+const { defaultIcon, closeDialog, notify, formatBytes } = require("./reusable.js");
 const package = require("../package.json");
 
 const packageName = process.env.npm_package_name || "delta-client";
@@ -26,18 +26,39 @@ function createWindow() {
             preload: path.join(__dirname, 'preload.js')
         },
         titleBarStyle: 'hidden'
-    })
+    });
+    mainWindow.loadURL('https://buildroyale.io/');
 
     mainWindow.removeMenu();
 }
 
-ipcMain.handle("closeDialog", async () => {
-    test = await dialog.showMessageBox(closeDialog);
-    if (test.response === 0) app.quit();
-});
+let splash;
+function splashWindow() {
+    splash = new BrowserWindow({
+        width: 1200, // 800 * 1.5
+        height: 750, // 500 * 1.5
+        center: true,
+        skipTaskbar: false,
+        icon: "./build/icon.ico",
+        resizable: false,
+        frame: false,
+        transparent: true,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false
+        },
+    });
+    splash.loadURL(`file://${__dirname}/../public/loader.html`);
+    splash.removeMenu();
+    splash.openDevTools();
+}
+const sendSplashMessage = (message, optionalExtras) => {
+    splash.webContents.send(message, optionalExtras);
+}
 
 function main() {
-    autoUpdater.checkForUpdatesAndNotify();
+    createWindow();
+
     globalShortcut.register('F5', () => {
         if (!mainWindow.isFocused()) return;
         mainWindow.webContents.reload();
@@ -51,21 +72,17 @@ function main() {
     });
 
     let extPath = "";
-    if (isDev) extPath = path.resolve(__dirname, "..", "extension")
-    else extPath = path.resolve(__dirname, "..", "..", "app.asar.unpacked", "extension")
+    if (isDev) {
+        extPath = path.resolve(__dirname, "..", "extension");
+    } else {
+        extPath = path.resolve(__dirname, "..", "..", "app.asar.unpacked", "extension");
+    }
     log.info(`Extension location: '${extPath}'`);
     session.defaultSession.loadExtension(extPath).then(() => {
         mainWindow.loadURL('https://buildroyale.io/');
     });
 
-    notify(`Delta v${package.version} is running!`);
-
-    createWindow();
-    app.on('activate', () => {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
-        }
-    })
+    //notify(`Delta v${package.version} is running!`);
 }
 
 
@@ -91,16 +108,47 @@ autoUpdater.on('checking-for-update', async () => {
 });
 
 autoUpdater.on('update-available', (info) => {
-    notify("Update available!", "Downloading update... please do not close Delta Client.");
+    sendSplashMessage("upd-available");
+    //notify("Update available!", "Downloading update... please do not close Delta Client.");
 });
-
+autoUpdater.on('update-not-available', (info) => {
+    sendSplashMessage("upd-not-available");
+});
+autoUpdater.on('download-progress', (progressObj) => {
+    sendSplashMessage("upd-down-progress", {
+        mbps: formatBytes(progressObj.bytesPerSecond),
+        percent: progressObj.percent,
+        transferred: formatBytes(progressObj.transferred),
+        total: formatBytes(progressObj.total)
+    });
+});
 autoUpdater.on('update-downloaded', (info) => {
-    notify("Update downloaded!", "You can now restart the app to see the new version.");
+    sendSplashMessage("upd-downloaded");
+    //notify("Update downloaded!", "You can now restart the app to see the new version.");
+});
+autoUpdater.on('error', message => {
+    sendSplashMessage("error");
+    log.info(`Error with autoupdater: '${message}'`);
+    //notify("There was an error running the auto updater!", "Please check your logs for further information.");
 });
 
-autoUpdater.on('error', message => {
-    log.info(`Error with autoupdater: '${message}'`);
-    notify("There was an error running the auto updater!", "Please check your logs for further information.");
+/*
+#####################################
+!        Ready event
+#####################################
+*/
+
+app.once('ready', () => {
+    splashWindow();
+
+    if (isDev) {
+        splash.webContents.on("did-finish-load", () => {
+            sendSplashMessage("upd-not-available");
+        });
+    } else {
+        autoUpdater.logger = log;
+        autoUpdater.checkForUpdates();
+    }
 });
 
 /*
@@ -121,17 +169,27 @@ const login = async function () {
 client.on('ready', () => {
     let RPCManager = new rpcManager(client);
 
-    ipcMain.handle("baserp", async () => {
+    ipcMain.on("baserp", async () => {
         RPCManager.gameInfo.state = "base";
         RPCManager.states[RPCManager.gameInfo.state].setDefault();
     });
 });
 
-ipcMain.handle("sendLog", async (bullshit, value) => {
+ipcMain.on("sendLog", async (bullshit, value) => {
     console.log(value)
 });
 
-app.whenReady().then(main);
+ipcMain.on("launchClient", async () => {
+    setTimeout(() => {
+        main();
+        splash.close();
+    }, 5000);
+});
+
+ipcMain.on("closeDialog", async () => {
+    test = await dialog.showMessageBox(closeDialog);
+    if (test.response === 0) app.quit();
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {

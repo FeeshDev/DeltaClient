@@ -1,6 +1,6 @@
 chrome.webRequest.onBeforeRequest.addListener(
     (details) => {
-        let useDefault = false;
+        let useDefault = true;
         let url = chrome.runtime.getURL("newclient.js");
         if (details.url.includes("https://buildroyale.io/js/app.js") && !useDefault)
             return { redirectUrl: url };
