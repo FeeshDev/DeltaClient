@@ -49,6 +49,7 @@
                 1px -1px 0 #000,
                 -1px 1px 0 #000,
                 1px 1px 0 #000;
+            font-size: 40px;
             color: #EEEEEE;
         }
 
@@ -73,7 +74,6 @@
 
         let checking = true;
 
-        window.downloadStatus = "";
         let index = 0;
         let updateElem = document.getElementById("update");
 
@@ -84,11 +84,12 @@
 
         setInterval(() => {
             if (!checking) return;
-            updateElem.textContent = `Checking for updates${".".repeat(index % 4)}${downloadStatus}`;
+            updateElem.textContent = `Checking for updates${".".repeat(index % 4)}`;
             index++;
         }, 800);
 
         ipcRenderer.on("upd-available", () => {
+            changeStatus("Update available! Downloading...");
         });
 
         ipcRenderer.on("upd-not-available", () => {
@@ -97,11 +98,14 @@
         });
 
         ipcRenderer.on("upd-downloaded", () => {
-            changeStatus("update downloaded");
+            changeStatus("Update downloaded!");
         });
 
-        ipcRenderer.on("upd-down-progress", (progress) => {
-
+        let downloadBar = document.getElementById("downloadBar");
+        ipcRenderer.on("upd-down-progress", (test, progress) => {
+            console.log(progress);
+            changeStatus(`Downloading (${progress.transferred}/${progress.total}, ${progress.mbps}/s)`);
+            downloadBar.style.width = `${progress.percent.toFixed()}%`;
         });
 
         ipcRenderer.on("error", () => {

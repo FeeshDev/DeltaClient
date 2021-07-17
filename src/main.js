@@ -109,7 +109,6 @@ autoUpdater.on('checking-for-update', async () => {
 
 autoUpdater.on('update-available', (info) => {
     sendSplashMessage("upd-available");
-    //notify("Update available!", "Downloading update... please do not close Delta Client.");
 });
 autoUpdater.on('update-not-available', (info) => {
     sendSplashMessage("upd-not-available");
@@ -124,7 +123,6 @@ autoUpdater.on('download-progress', (progressObj) => {
 });
 autoUpdater.on('update-downloaded', (info) => {
     sendSplashMessage("upd-downloaded");
-    //notify("Update downloaded!", "You can now restart the app to see the new version.");
 });
 autoUpdater.on('error', message => {
     sendSplashMessage("error");
@@ -182,7 +180,7 @@ ipcMain.on("sendLog", async (bullshit, value) => {
 ipcMain.on("launchClient", async () => {
     setTimeout(() => {
         main();
-        splash.close();
+        //splash.close();
     }, 5000);
 });
 
