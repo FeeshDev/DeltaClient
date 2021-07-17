@@ -76,7 +76,6 @@ function main() {
 */
 
 autoUpdater.on('checking-for-update', async () => {
-    notify("Checking for update!", "Feel free to ignore this, it's just a background check.");
     var pendingPath = ""; //* Original path
 
     if (process.platform === "win32") pendingPath = path.resolve(process.env.LOCALAPPDATA, `${packageName}-updater/pending`); //* Windows
@@ -97,6 +96,11 @@ autoUpdater.on('update-available', (info) => {
 
 autoUpdater.on('update-downloaded', (info) => {
     notify("Update downloaded!", "You can now restart the app to see the new version.");
+});
+
+autoUpdater.on('error', message => {
+    log.info(`Error with autoupdater: '${message}'`);
+    notify("There was an error running the auto updater!", "Please check your logs for further information.");
 });
 
 /*
