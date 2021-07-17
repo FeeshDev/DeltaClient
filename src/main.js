@@ -1,7 +1,9 @@
-const { ipcMain, dialog, nativeImage, app, BrowserWindow, session } = require('electron');
+const { ipcMain, dialog, globalShortcut, app, BrowserWindow, session } = require('electron');
 const log = require('electron-log');
+const isDev = require('electron-is-dev');
 const path = require('path');
-const rpcManager = require("./src/rpcManager");
+const rpcManager = require("./rpcManager");
+const fs = require("fs-extra");
 
 let mainWindow;
 function createWindow() {
@@ -65,17 +67,25 @@ ipcMain.handle("sendLog", async (bullshit, value) => {
 });
 
 function main() {
-    ipcMain.handle("reload", async () => {
-        mainWindow.webContents.reload()
+    globalShortcut.register('F5', () => {
+        if (!mainWindow.isFocused()) return;
+        mainWindow.webContents.reload();
+    });
+    globalShortcut.register('F11', () => {
+        if (!mainWindow.isFocused()) return;
+        mainWindow.fullScreen = !mainWindow.fullScreen;
     });
     ipcMain.handle("console", async () => {
         mainWindow.webContents.isDevToolsOpened() ? mainWindow.webContents.closeDevTools() : mainWindow.webContents.openDevTools();
     });
-    ipcMain.handle("fullscreen", async () => {
-        mainWindow.fullScreen = !mainWindow.fullScreen;
-    });
 
-    session.defaultSession.loadExtension(path.resolve(__dirname, "extension")).then(() => {
+    let extPath = "";
+    if (isDev) extPath = path.resolve(__dirname, "..", "extension")
+    else extPath = path.resolve(__dirname, "..", "..", "app.asar.unpacked", "extension")
+
+    log.info(`Extension location: '${extPath}'`);
+
+    session.defaultSession.loadExtension(extPath).then(() => {
         mainWindow.loadURL('https://buildroyale.io/');
     });
     createWindow();
@@ -92,6 +102,10 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
     }
+})
+
+app.on('will-quit', () => {
+    globalShortcut.unregisterAll()
 })
 
 login();

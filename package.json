@@ -2,7 +2,7 @@
   "name": "delta-client",
   "version": "2.0.0",
   "description": "Delta Client for BuildRoyale.io",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
     "start": "electron .",
     "pack": "electron-builder --dir",
@@ -16,6 +16,7 @@
     "productName": "Delta Client",
     "appId": "com.github.FeeshDev.deltaclient",
     "compression": "normal",
+    "asarUnpack": "extension",
     "publish": [
       {
         "provider": "github",
@@ -24,7 +25,6 @@
       }
     ],
     "files": [
-      "main.js",
       "build/**",
       "extension/**",
       "public/**",
