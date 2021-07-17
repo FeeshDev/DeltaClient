@@ -14,9 +14,8 @@
     ],
     "web_accessible_resources": [
         "newclient.js",
-        "greensheet.png",
-        "redsheet.png",
-        "logo.png"
+        "img/logo.png",
+        "img/deltaNew.png"
     ],
     "manifest_version": 2
 }

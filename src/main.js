@@ -1,24 +1,15 @@
 const { ipcMain, dialog, nativeImage, app, BrowserWindow, session } = require('electron');
 
-if (require('electron-squirrel-startup')) return app.quit();
-
 const path = require('path');
 const rpcManager = require("./rpcManager");
-const httpServer = require("http").createServer();
-const io = require("socket.io")(httpServer, {
-    cors: {
-        origin: "https://buildroyale.io",
-        methods: ["GET", "POST"]
-    }
-});
 
 let mainWindow;
-const icon = nativeImage.createFromPath(path.resolve(".", "assets", "delta.png"))
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
         title: "Delta Client",
+        icon: "./build/icon.ico",
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -27,7 +18,6 @@ function createWindow() {
             nativeWindowOpen: true,
             preload: path.join(__dirname, 'preload.js')
         },
-        icon,
         titleBarStyle: 'hidden'
     })
 
@@ -44,7 +34,7 @@ const dialogOptions = {
     type: 'none',
     title: "Delta Client",
     buttons: ['OK', 'Cancel'],
-    icon,
+    icon: "./build/icon.ico",
     message: 'Would you like to close Delta?'
 };
 ipcMain.handle("closeDialog", async () => {
@@ -68,27 +58,6 @@ client.on('ready', () => {
         RPCManager.gameInfo.state = "base";
         RPCManager.states[RPCManager.gameInfo.state].setDefault();
     });
-
-    io.on("connection", (socket) => {
-        socket.on("gameState", (state) => {
-            if (state == RPCManager.gameInfo.state) return;
-            if (RPCManager.gameInfo.state == "spec" && state == "menu") {
-                RPCManager.gameInfo.state = "menu";
-                RPCManager.states[RPCManager.gameInfo.state].setDefault();
-                RPCManager.states[RPCManager.gameInfo.state].updateState();
-            } else {
-                RPCManager.gameInfo.state = state;
-                RPCManager.states[RPCManager.gameInfo.state].setDefault();
-            }
-        });
-        socket.on("gameInfo", (key, value) => {
-            RPCManager.gameInfo[key] = value;
-            if (typeof RPCManager.states[RPCManager.gameInfo.state].updateState == "function") RPCManager.states[RPCManager.gameInfo.state].updateState();
-        });
-        socket.on("test", () => {
-            console.log("Socket Test Received!")
-        });
-    });
 })
 
 ipcMain.handle("sendLog", async (bullshit, value) => {
@@ -106,9 +75,7 @@ function main() {
         mainWindow.fullScreen = !mainWindow.fullScreen;
     });
 
-
-    //mainWindow.fullScreen = true;
-    session.defaultSession.loadExtension(path.resolve(__dirname, "ext")).then(() => {
+    session.defaultSession.loadExtension(path.resolve(__dirname, "..", "public", "ext")).then(() => {
         mainWindow.loadURL('https://buildroyale.io/');
     });
     createWindow();
@@ -127,5 +94,4 @@ app.on('window-all-closed', () => {
     }
 })
 
-httpServer.listen(3344);
 login();

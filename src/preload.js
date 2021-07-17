@@ -16,14 +16,20 @@ window.addEventListener("keyup", function (e) {
 });
 
 window.addEventListener("keydown", function (e) {
-    if (e.code == "Space") {
-        if (document.getElementById("loadingDesktop").style.display !== "none") ipcRenderer.invoke("console");
+    if (e.code == "F12") {
+        ipcRenderer.invoke("console");
     }
 });
 
 window.addEventListener("keydown", function (e) {
-    if (e.code == "KeyR") {
-        if (document.getElementById("loadingDesktop").style.display !== "none") ipcRenderer.invoke("reload");
+    if (e.code == "F11") {
+        ipcRenderer.invoke("fullscreen");
+    }
+});
+
+window.addEventListener("keydown", function (e) {
+    if (e.code == "F5") {
+        ipcRenderer.invoke("reload");
     }
 });
 
