@@ -1,7 +1,7 @@
 const { ipcMain, dialog, nativeImage, app, BrowserWindow, session } = require('electron');
-
+const log = require('electron-log');
 const path = require('path');
-const rpcManager = require("./rpcManager");
+const rpcManager = require("./src/rpcManager");
 
 let mainWindow;
 function createWindow() {
@@ -75,7 +75,7 @@ function main() {
         mainWindow.fullScreen = !mainWindow.fullScreen;
     });
 
-    session.defaultSession.loadExtension(path.resolve(__dirname, "..", "public", "ext")).then(() => {
+    session.defaultSession.loadExtension(path.resolve(__dirname, "extension")).then(() => {
         mainWindow.loadURL('https://buildroyale.io/');
     });
     createWindow();
