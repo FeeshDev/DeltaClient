@@ -124,6 +124,11 @@ autoUpdater.on('download-progress', (progressObj) => {
 });
 autoUpdater.on('update-downloaded', (info) => {
     sendSplashMessage("upd-downloaded");
+
+    app.relaunch();
+    setTimeout(() => {
+        app.exit(0);
+    }, 3000);
 });
 autoUpdater.on('error', message => {
     sendSplashMessage("error");
@@ -143,6 +148,7 @@ app.once('ready', () => {
     if (isDev) {
         splash.webContents.on("did-finish-load", () => {
             sendSplashMessage("upd-not-available");
+            //sendSplashMessage("upd-downloaded");
         });
     } else {
         autoUpdater.logger = log;
