@@ -83,7 +83,7 @@ function main() {
         mainWindow.loadURL('https://buildroyale.io/');
     });
 
-    //notify(`Delta v${package.version} is running!`);
+    notify(`Delta v${package.version} is running!`);
 }
 
 
