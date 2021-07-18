@@ -40,6 +40,7 @@ function splashWindow() {
         center: true,
         skipTaskbar: false,
         icon: "./build/icon.ico",
+        alwaysOnTop: true,
         resizable: false,
         frame: false,
         transparent: true,
@@ -50,7 +51,7 @@ function splashWindow() {
     });
     splash.loadURL(`file://${__dirname}/../public/loader.html`);
     splash.removeMenu();
-    splash.openDevTools();
+    //splash.openDevTools();
 }
 const sendSplashMessage = (message, optionalExtras) => {
     splash.webContents.send(message, optionalExtras);
@@ -180,7 +181,7 @@ ipcMain.on("sendLog", async (bullshit, value) => {
 ipcMain.on("launchClient", async () => {
     setTimeout(() => {
         main();
-        //splash.close();
+        splash.close();
     }, 5000);
 });
 

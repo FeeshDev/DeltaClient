@@ -64,7 +64,7 @@
         #downloadBar {
             overflow: hidden;
             background-color: #4B87D1;
-            width: 50%;
+            width: 0%;
             height: inherit;
             border-radius: 10px;
         }
@@ -93,8 +93,13 @@
             changeStatus("Update available! Downloading...");
         });
 
+        let newBarPercent = 0;
         ipcRenderer.on("upd-not-available", () => {
             changeStatus("Launching client...");
+            setInterval(() => {
+                downloadBar.style.width = `${newBarPercent}%`;
+                newBarPercent += 0.1;
+            }, 4900 / 1000);
             ipcRenderer.send("launchClient");
         });
 
