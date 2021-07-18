@@ -13,6 +13,7 @@ Custom electron client for popular battle royale io game: BuildRoyale.io
   - DiscordRPC
   - FPS meter
   - Killfeed and game stats tracker
+  - Mac and linux support
   - And more!
 
 ### Download the latest release [here](https://github.com/FeeshDev/DeltaClient/releases/latest).
