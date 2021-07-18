@@ -14,3 +14,5 @@ Custom electron client for popular battle royale io game: BuildRoyale.io
   - FPS meter
   - Killfeed and game stats tracker
   - And more!
+
+### Download the latest release [here](https://github.com/FeeshDev/DeltaClient/releases/latest).
