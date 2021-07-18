@@ -6,7 +6,6 @@ const path = require('path');
 const rpcManager = require("./rpcManager");
 const fs = require("fs-extra");
 const { defaultIcon, closeDialog, notify, formatBytes } = require("./reusable.js");
-const package = require("../package.json");
 
 const packageName = process.env.npm_package_name || "delta-client";
 
@@ -82,8 +81,6 @@ function main() {
     session.defaultSession.loadExtension(extPath).then(() => {
         mainWindow.loadURL('https://buildroyale.io/');
     });
-
-    notify(`Delta v${package.version} is running!`);
 }
 
 
@@ -112,7 +109,7 @@ autoUpdater.on('update-available', (info) => {
     sendSplashMessage("upd-available");
 });
 autoUpdater.on('update-not-available', (info) => {
-    sendSplashMessage("upd-not-available");
+    sendSplashMessage("upd-not-available", app.getVersion());
 });
 autoUpdater.on('download-progress', (progressObj) => {
     sendSplashMessage("upd-down-progress", {
@@ -133,7 +130,6 @@ autoUpdater.on('update-downloaded', (info) => {
 autoUpdater.on('error', message => {
     sendSplashMessage("error");
     log.info(`Error with autoupdater: '${message}'`);
-    //notify("There was an error running the auto updater!", "Please check your logs for further information.");
 });
 
 /*
@@ -147,7 +143,8 @@ app.once('ready', () => {
 
     if (isDev) {
         splash.webContents.on("did-finish-load", () => {
-            sendSplashMessage("upd-not-available");
+            sendSplashMessage("upd-not-available", app.getVersion());
+            //app.relaunch();
             //sendSplashMessage("upd-downloaded");
         });
     } else {

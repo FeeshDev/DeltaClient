@@ -94,8 +94,8 @@
         });
 
         let newBarPercent = 0;
-        ipcRenderer.on("upd-not-available", () => {
-            changeStatus("Launching client...");
+        ipcRenderer.on("upd-not-available", (test, version) => {
+            changeStatus(`Launching client... (v${version})`);
             setInterval(() => {
                 downloadBar.style.width = `${newBarPercent}%`;
                 newBarPercent += 0.1;
