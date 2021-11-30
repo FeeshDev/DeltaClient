@@ -19,8 +19,12 @@ window.addEventListener("keydown", function (e) {
     }
 });
 
+
 //KeyR
 
 window.onload = () => {
-
+    if (localStorage.getItem("warning") != "true") {
+        ipcRenderer.invoke("warning");
+        localStorage.setItem("warning", "true");
+    }
 }

@@ -5,7 +5,7 @@ const isDev = require('electron-is-dev');
 const path = require('path');
 const rpcManager = require("./rpcManager");
 const fs = require("fs-extra");
-const { defaultIcon, closeDialog, notify, formatBytes } = require("./reusable.js");
+const { defaultIcon, closeDialog, warning, notify, formatBytes } = require("./reusable.js");
 
 const packageName = process.env.npm_package_name || "delta-client";
 
@@ -69,6 +69,13 @@ function main() {
     });
     ipcMain.handle("console", async () => {
         mainWindow.webContents.isDevToolsOpened() ? mainWindow.webContents.closeDevTools() : mainWindow.webContents.openDevTools();
+    });
+    ipcMain.handle("closeDialog", async () => {
+        let test = await dialog.showMessageBox(closeDialog);
+        if (test.response === 0) app.quit();
+    });
+    ipcMain.handle("warning", async () => {
+        await dialog.showMessageBox(warning);
     });
 
     let extPath = "";
@@ -186,11 +193,6 @@ ipcMain.on("launchClient", async () => {
         main();
         splash.close();
     }, 5000);
-});
-
-ipcMain.on("closeDialog", async () => {
-    test = await dialog.showMessageBox(closeDialog);
-    if (test.response === 0) app.quit();
 });
 
 app.on('window-all-closed', () => {
