@@ -17,7 +17,16 @@ const environments = {
     event: { label: 'Tournament', url: 'https://staging.buildroyale.io/?tournament=1' },
     dev: { label: 'Local', url: 'http://127.0.0.1:8081/', devOnly: true }
 };
-const notify = (notif_title, notif_body) => {
+//* Defaults for settings.json 'performance', applied at startup so changes need a restart
+const defaultPerformance = {
+    uncapFps: true, //* No vsync / frame rate limit: lower input latency, may tear and run hotter
+    backgroundRunning: false, //* Keep timers and rendering at full speed while unfocused or hidden
+    ignoreGpuBlocklist: true, //* Keep the canvas GPU accelerated on drivers Chromium blocklists
+    highPerformanceGpu: true, //* Use the dedicated GPU on laptops with two
+    angleBackend: null, //* 'd3d11', 'd3d9', 'gl' or null for Chromium's default
+    highPriority: true //* Run the game's renderer and GPU processes above normal priority
+};
+const notify =(notif_title, notif_body) => {
     new Notification({ title: notif_title, body: notif_body }).show()
 }
 const formatBytes = (bytes, decimals = 2) => {
@@ -32,4 +41,4 @@ const formatBytes = (bytes, decimals = 2) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
-module.exports = { appName, defaultIcon, closeDialog, environments, notify, formatBytes };
+module.exports = { appName, defaultIcon, closeDialog, environments, defaultPerformance, notify, formatBytes };

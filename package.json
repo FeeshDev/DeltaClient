@@ -1,6 +1,6 @@
 {
   "name": "brclient",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "BRClient for BuildRoyale.io",
   "main": "src/main.js",
   "scripts": {

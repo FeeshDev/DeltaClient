@@ -5,7 +5,8 @@ const path = require('path');
 const fs = require('fs');
 const { Client } = require('discord-rpc');
 const rpcManager = require("./rpcManager");
-const { appName, defaultIcon, closeDialog, environments, formatBytes } = require("./reusable.js");
+const os = require('os');
+const { appName, defaultIcon, closeDialog, environments, defaultPerformance, formatBytes } = require("./reusable.js");
 
 const isDev = !app.isPackaged;
 
@@ -31,17 +32,6 @@ if (!fs.existsSync(userDataPath) && fs.existsSync(legacyUserDataPath)) {
     }
 }
 
-/*
-#####################################
-        Environments
-#####################################
-*/
-
-//* Dev is only offered when running from source, or with --env=dev on a packaged build
-const envArg = process.argv.find(arg => arg.startsWith('--env='))?.slice('--env='.length);
-const devAllowed = isDev || envArg === 'dev';
-const isAllowedEnv = (env) => !!environments[env] && (devAllowed || !environments[env].devOnly);
-
 const settingsPath = path.join(userDataPath, 'settings.json');
 let settings = {};
 try {
@@ -54,6 +44,66 @@ const saveSettings = () => {
         log.error(`Failed to save settings: '${err}'`);
     }
 };
+
+/*
+#####################################
+        Performance
+#####################################
+*/
+
+//* Write any missing options back so players can find and edit them in settings.json
+const performance = { ...defaultPerformance, ...settings.performance };
+if (JSON.stringify(performance) !== JSON.stringify(settings.performance)) {
+    settings.performance = performance;
+    saveSettings();
+}
+
+//* Switches only take effect before 'ready'
+if (performance.uncapFps) {
+    app.commandLine.appendSwitch('disable-frame-rate-limit');
+    app.commandLine.appendSwitch('disable-gpu-vsync');
+}
+//* Otherwise Chromium resets renderer priority whenever the window loses or gains focus
+if (performance.backgroundRunning || performance.highPriority) {
+    app.commandLine.appendSwitch('disable-renderer-backgrounding');
+}
+if (performance.backgroundRunning) {
+    app.commandLine.appendSwitch('disable-background-timer-throttling');
+    app.commandLine.appendSwitch('disable-backgrounding-occluded-windows');
+}
+if (performance.ignoreGpuBlocklist) {
+    app.commandLine.appendSwitch('ignore-gpu-blocklist');
+    app.commandLine.appendSwitch('enable-gpu-rasterization');
+}
+if (performance.highPerformanceGpu) app.commandLine.appendSwitch('force_high_performance_gpu');
+if (performance.angleBackend) app.commandLine.appendSwitch('use-angle', performance.angleBackend);
+
+//* The renderer can change on navigation and the GPU process on a crash, so this runs after each load
+function raisePriority() {
+    if (!performance.highPriority || !mainWindow) return;
+    const pids = [mainWindow.webContents.getOSProcessId()];
+    for (const metric of app.getAppMetrics()) {
+        if (metric.type === 'GPU') pids.push(metric.pid);
+    }
+    for (const pid of pids) {
+        try {
+            os.setPriority(pid, os.constants.priority.PRIORITY_ABOVE_NORMAL);
+        } catch (err) {
+            log.warn(`Failed to raise priority of ${pid}: '${err.message}'`);
+        }
+    }
+}
+
+/*
+#####################################
+        Environments
+#####################################
+*/
+
+//* Dev is only offered when running from source, or with --env=dev on a packaged build
+const envArg = process.argv.find(arg => arg.startsWith('--env='))?.slice('--env='.length);
+const devAllowed = isDev || envArg === 'dev';
+const isAllowedEnv = (env) => !!environments[env] && (devAllowed || !environments[env].devOnly);
 
 //TODO: temporary while testing the env switcher, go back to 'normal' before release
 const defaultEnv = devAllowed ? 'dev' : 'normal';
@@ -99,6 +149,7 @@ function createWindow() {
             nodeIntegration: false,
             contextIsolation: true,
             sandbox: true,
+            backgroundThrottling: !performance.backgroundRunning,
             preload: path.join(__dirname, 'preload.js')
         }
     });
@@ -133,6 +184,7 @@ function createWindow() {
         presence = null;
         queuePresence();
     });
+    mainWindow.webContents.on('did-finish-load', raisePriority);
 
     mainWindow.on('closed', () => {
         mainWindow = null;
