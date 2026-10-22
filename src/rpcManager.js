@@ -1,201 +1,102 @@
+//* Renders presence snapshots sent by the game ("brclient:presence" events, payload v1)
+
+const MODES = { solo: "Solo", duos: "Duos", squads: "Squads", snowball: "Snowball" };
+const STATES = ["menu", "lobby", "game", "spectating"];
+const STORM_PHASES = ["safe", "shrinking"];
+const MAX_LOBBY_WAIT = 10 * 60 * 1000; //* Dev servers report countdowns hours away, don't show those
+const MAX_CLOCK_DRIFT = 24 * 60 * 60 * 1000;
+
+const count = (n, max) => Number.isInteger(n) && n >= 0 && n <= max ? n : null;
+const timestamp = (t) => Number.isFinite(t) && Math.abs(t - Date.now()) < MAX_CLOCK_DRIFT ? t : null;
+
 module.exports = class rpcManager {
     constructor(client) {
         this.client = client;
-        this.gameInfo = {
-            state: "default",
-            time: "0:00",
-            players: "0",
-            elims: "0",
-            mode: "default",
-            partysize: 0,
-            stormstate: "default",
-            getMaxPartySize: () => {
-                switch (this.gameInfo.mode) {
-                    case "prod":
-                        return 1;
-                    case "duos":
-                        return 2;
-                    case "squads":
-                        return 4;
-                    default:
-                        return 1;
-                }
-            },
-            getCurrentModeDisplay: () => {
-                switch (this.gameInfo.mode) {
-                    case "prod":
-                        return "Solo";
-                    case "duos":
-                        return "Duos";
-                    case "squads":
-                        return "Squads";
-                    case "close":
-                        return "Close Encounters";
-                    default:
-                        return "Solo";
-                }
-            }
+    }
+
+    //* Validates the JSON string from the page, returns a clean snapshot or null
+    static parse(json) {
+        if (typeof json !== "string" || json.length > 2000) return null;
+        let data;
+        try {
+            data = JSON.parse(json);
+        } catch {
+            return null;
         }
-        this.Activity = {
-            details: `In menu`,
-            state: undefined,
-            partySize: undefined,
-            partyMax: undefined,
-            startTimestamp: undefined,
-            largeImageKey: `brlogo`,
-            largeImageText: undefined,
-            smallImageKey: undefined,
-            smallImageText: undefined,
+        if (!data || data.v !== 1 || !STATES.includes(data.state)) return null;
+
+        const partyMax = count(data.partyMax, 16);
+        return {
+            state: data.state,
+            mode: MODES[data.mode] ?? null,
+            partySize: partyMax ? Math.min(count(data.partySize, 16) ?? 0, partyMax) : 0,
+            partyMax,
+            playersLeft: count(data.playersLeft, 1000),
+            kills: count(data.kills, 1000),
+            lobbyStartsAt: timestamp(data.lobbyStartsAt),
+            matchStartedAt: timestamp(data.matchStartedAt),
+            stormPhase: STORM_PHASES.includes(data.stormPhase) ? data.stormPhase : null,
+            spectating: typeof data.spectating === "string" ? data.spectating.trim().slice(0, 32) || null : null
+        };
+    }
+
+    //* null = no snapshot yet (page loading, or an old game build that doesn't send any)
+    //* env = environment label shown as "[Tournament]", null on the default environment
+    render(snapshot, env = null) {
+        const tag = env ? ` [${env}]` : "";
+        const activity = {
+            details: `Playing BuildRoyale.io${tag}`,
+            largeImageKey: "br",
+            largeImageText: "BuildRoyale.io",
             instance: false
-        }
-        this.states = {
-            base: {
-                setDefault: () => {
-                    this.Activity = {
-                        details: `RPC Disabled`,
-                        state: undefined,
-                        partySize: undefined,
-                        partyMax: undefined,
-                        startTimestamp: Date.now(),
-                        largeImageKey: `brlogo`,
-                        largeImageText: "BuildRoyale.io",
-                        smallImageKey: "delta",
-                        smallImageText: "Delta Client",
-                        instance: false
-                    }
-                    this.updateActivity();
-                },
-                updateState: () => {}
-            },
-            spec: {
-                setDefault: () => {
-                    this.Activity = {
-                        details: `Spectating`,
-                        state: undefined,
-                        partySize: undefined,
-                        partyMax: undefined,
-                        startTimestamp: Date.now(),
-                        largeImageKey: `brlogo`,
-                        largeImageText: "BuildRoyale.io",
-                        smallImageKey: "delta",
-                        smallImageText: "Delta Client",
-                        instance: false
-                    }
-                    this.updateActivity();
-                },
-                updateState: () => {
-                    this.Activity["details"] = `Spectating ${this.gameInfo.getCurrentModeDisplay()}`;
-                    if (this.gameInfo.partysize > 0) {
-                        this.Activity["state"] = "In Party";
-                        this.Activity["partySize"] = parseInt(this.gameInfo.partysize);
-                        this.Activity["partyMax"] = this.gameInfo.getMaxPartySize();
-                    } else {
-                        this.Activity["state"] = undefined;
-                        this.Activity["partySize"] = undefined;
-                        this.Activity["partyMax"] = undefined;
-                    }
-                    this.updateActivity();
-                }
-            },
-            menu: {
-                setDefault: () => {
-                    this.Activity = {
-                        details: `In Menu`,
-                        state: undefined,
-                        partySize: undefined,
-                        partyMax: undefined,
-                        startTimestamp: undefined,
-                        largeImageKey: `brlogo`,
-                        largeImageText: "BuildRoyale.io",
-                        smallImageKey: "delta",
-                        smallImageText: "Delta Client",
-                        instance: false
-                    }
-                    this.updateActivity();
-                },
-                updateState: () => {
-                    if (this.gameInfo.partysize > 0) {
-                        this.Activity["state"] = "In Party";
-                        this.Activity["partySize"] = parseInt(this.gameInfo.partysize);
-                        this.Activity["partyMax"] = this.gameInfo.getMaxPartySize();
-                    } else {
-                        this.Activity["state"] = undefined;
-                        this.Activity["partySize"] = undefined;
-                        this.Activity["partyMax"] = undefined;
-                    }
-                    this.updateActivity();
-                }
-            },
-            lobby: {
-                setDefault: () => {
-                    this.Activity = {
-                        details: "Loading Lobby Details", //waiting
-                        state: "Loading Lobby State", //in lobby
-                        startTimestamp: undefined,
-                        largeImageKey: `brlogo`,
-                        largeImageText: "BuildRoyale.io",
-                        smallImageKey: "delta",
-                        smallImageText: "Delta Client",
-                        instance: false
-                    }
-                    this.updateActivity();
-                },
-                updateState: () => {
-                    if (parseInt(this.gameInfo.players) <= this.gameInfo.getMaxPartySize()) {
-                        this.Activity["details"] = `Waiting for players...`;
-                    } else {
-                        this.Activity["details"] = `Match in ${this.gameInfo.time} | ${this.gameInfo.players} Players`;
-                    }
-                    this.Activity["state"] = `In ${this.gameInfo.getCurrentModeDisplay()} Lobby`;
-                    if (this.gameInfo.partysize > 0) {
-                        this.Activity["partySize"] = parseInt(this.gameInfo.partysize);
-                        this.Activity["partyMax"] = this.gameInfo.getMaxPartySize();
-                    } else {
-                        this.Activity["partySize"] = undefined;
-                        this.Activity["partyMax"] = undefined;
-                    }
-                    this.updateActivity();
-                }
-            },
-            game: {
-                setDefault: () => {
-                    this.Activity = {
-                        details: "Loading Game Details", //0 kills | 0 players
-                        state: "Loading Game State", // playing solo
-                        partySize: 0,
-                        partyMax: 0,
-                        startTimestamp: Date.now(),
-                        largeImageKey: `brlogo`,
-                        largeImageText: "Delta Client",
-                        smallImageKey: undefined,
-                        smallImageText: undefined,
-                        instance: false
-                    }
-                    this.updateActivity();
-                },
-                updateState: () => {
-                    this.Activity["details"] = `${this.gameInfo.elims} Kills | ${this.gameInfo.players} Players`;
-                    this.Activity["state"] = `Playing ${this.gameInfo.getCurrentModeDisplay()}`;
-                    if (this.gameInfo.partysize > 0) {
-                        this.Activity["partySize"] = parseInt(this.gameInfo.partysize);
-                        this.Activity["partyMax"] = this.gameInfo.getMaxPartySize();
-                    } else {
-                        this.Activity["partySize"] = undefined;
-                        this.Activity["partyMax"] = undefined;
-                    }
-                    this.Activity["smallImageKey"] = this.gameInfo.stormstate;
-                    this.Activity["smallImageText"] = this.gameInfo.time;
-                    this.updateActivity();
-                }
+        };
+        if (snapshot) Object.assign(activity, this.describe(snapshot, tag));
+        this.client.setActivity(activity).catch(() => {}); //* Discord closed, nothing to do
+    }
+
+    describe(s, tag = "") {
+        const mode = s.mode ?? "Battle Royale";
+        const players = s.playersLeft !== null ? `${s.playersLeft} Left` : null;
+        //* Discord shows "(2 of 4)" after the state line, so only send it with a state line
+        const party = s.partySize > 0 && s.partyMax > 1 ? { partySize: s.partySize, partyMax: s.partyMax } : {};
+
+        switch (s.state) {
+            case "menu":
+                return {
+                    details: party.partySize ? "In Menu" : `In Menu${tag}`,
+                    ...(party.partySize ? { state: `${mode} Party${tag}`, ...party } : {})
+                };
+            case "lobby": {
+                const countdown = s.lobbyStartsAt && s.lobbyStartsAt > Date.now() && s.lobbyStartsAt - Date.now() < MAX_LOBBY_WAIT;
+                return {
+                    details: countdown && s.playersLeft !== null ? `Match starting | ${s.playersLeft} Players` : "Waiting for players...",
+                    state: `In ${mode} Lobby${tag}`,
+                    endTimestamp: countdown ? s.lobbyStartsAt : undefined,
+                    smallImageKey: "timer",
+                    smallImageText: countdown ? "Match starting" : "Waiting for players",
+                    ...party
+                };
             }
+            case "game": {
+                const kills = s.kills !== null ? `${s.kills} ${s.kills === 1 ? "Kill" : "Kills"}` : null;
+                return {
+                    details: [kills, players].filter(Boolean).join(" | ") || "In Match",
+                    state: `Playing ${mode}${tag}`,
+                    startTimestamp: s.matchStartedAt ?? undefined,
+                    smallImageKey: s.stormPhase === "shrinking" ? "storm" : s.stormPhase === "safe" ? "timer" : "killsicon",
+                    smallImageText: s.stormPhase === "shrinking" ? "Storm is shrinking" : s.stormPhase === "safe" ? "Storm is holding" : "In Match",
+                    ...party
+                };
+            }
+            case "spectating":
+                return {
+                    details: s.spectating ? `Spectating ${s.spectating}` : "Spectating",
+                    state: [mode + tag, players].filter(Boolean).join(" | "),
+                    startTimestamp: s.matchStartedAt ?? undefined,
+                    smallImageKey: "spectate",
+                    smallImageText: "Spectating",
+                    ...party
+                };
         }
-    }
-
-    updateActivity = () => {
-        this.client.setActivity(this.Activity);
-    }
-
-    setActivityField = (key, value) => {
-        this.Activity[key] = value;
     }
 }

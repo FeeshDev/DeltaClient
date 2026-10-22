@@ -1,23 +1,27 @@
 const { Notification } = require('electron');
+const path = require('path');
 
-const defaultIcon = "./build/icon.ico";
+const appName = "BRClient";
+const defaultIcon = path.join(__dirname, "..", "build", "br.ico");
 const closeDialog = {
     type: 'none',
-    title: "Delta Client",
+    title: appName,
     buttons: ['OK', 'Cancel'],
+    cancelId: 1,
     icon: defaultIcon,
-    message: 'Would you like to close Delta?'
+    message: `Would you like to close ${appName}?`
 };
-const warning = {
-    type: 'warning',
-    title: 'Discontinued',
-    message: 'Delta will be temporarily discontinued until further notice due to the recent purchase of buildroyale.io, we have great plans for the future.'
+//* Game servers the client can load. devOnly ones are hidden from players and never saved
+const environments = {
+    normal: { label: 'Normal', url: 'https://buildroyale.io/' },
+    event: { label: 'Tournament', url: 'https://staging.buildroyale.io/?tournament=1' },
+    dev: { label: 'Local', url: 'http://127.0.0.1:8081/', devOnly: true }
 };
 const notify = (notif_title, notif_body) => {
     new Notification({ title: notif_title, body: notif_body }).show()
 }
 const formatBytes = (bytes, decimals = 2) => {
-    if (bytes === 0) return '0 Bytes';
+    if (!bytes) return '0 Bytes';
 
     const k = 1024;
     const dm = decimals < 0 ? 0 : decimals;
@@ -28,4 +32,4 @@ const formatBytes = (bytes, decimals = 2) => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
 
-module.exports = { defaultIcon, closeDialog, warning, notify, formatBytes };
+module.exports = { appName, defaultIcon, closeDialog, environments, notify, formatBytes };

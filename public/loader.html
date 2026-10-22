@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+    <title>BRClient</title>
 </head>
 
 <body>
@@ -70,13 +71,12 @@
         }
     </style>
     <script>
-        const { ipcRenderer } = require("electron");
-        const text_check = document.getElementsByClassName("text_check")
+        const updateElem = document.getElementById("update");
+        const downloadBar = document.getElementById("downloadBar");
 
         let checking = true;
-
         let index = 0;
-        let updateElem = document.getElementById("update");
+        let launchInterval;
 
         const changeStatus = (text) => {
             checking = false;
@@ -89,33 +89,37 @@
             index++;
         }, 800);
 
-        ipcRenderer.on("upd-available", () => {
+        //* Ease the bar towards 95% while the game loads, the splash closes once it's ready
+        const startLaunchBar = () => {
+            if (launchInterval) return;
+            let barPercent = 0;
+            launchInterval = setInterval(() => {
+                barPercent += (95 - barPercent) * 0.02;
+                downloadBar.style.width = `${barPercent}%`;
+            }, 20);
+        }
+
+        window.updater.on("upd-available", () => {
             changeStatus("Update available! Downloading...");
         });
 
-        let newBarPercent = 0;
-        ipcRenderer.on("upd-not-available", (test, version) => {
+        window.updater.on("upd-not-available", (version) => {
             changeStatus(`Launching client... (v${version})`);
-            setInterval(() => {
-                downloadBar.style.width = `${newBarPercent}%`;
-                newBarPercent += 0.1;
-            }, 4900 / 1000);
-            ipcRenderer.send("launchClient");
+            startLaunchBar();
         });
 
-        ipcRenderer.on("upd-downloaded", () => {
-            changeStatus("Update downloaded! Delta will restart soon.");
+        window.updater.on("upd-downloaded", () => {
+            changeStatus("Update downloaded! BRClient will restart soon.");
         });
 
-        let downloadBar = document.getElementById("downloadBar");
-        ipcRenderer.on("upd-down-progress", (test, progress) => {
-            console.log(progress);
+        window.updater.on("upd-down-progress", (progress) => {
             changeStatus(`Downloading (${progress.transferred}/${progress.total}, ${progress.mbps}/s)`);
             downloadBar.style.width = `${progress.percent.toFixed()}%`;
         });
 
-        ipcRenderer.on("error", () => {
-            changeStatus("An error has occured.");
+        window.updater.on("error", () => {
+            changeStatus("Couldn't check for updates, launching anyway...");
+            startLaunchBar();
         });
     </script>
 </body>
