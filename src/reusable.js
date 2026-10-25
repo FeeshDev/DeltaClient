@@ -19,7 +19,7 @@ const environments = {
 };
 //* Defaults for settings.json 'performance', applied at startup so changes need a restart
 const defaultPerformance = {
-    uncapFps: true, //* No vsync / frame rate limit: lower input latency, may tear and run hotter
+    uncapFps: false, //* No vsync / frame rate limit: lower input latency, may tear and run hotter
     backgroundRunning: false, //* Keep timers and rendering at full speed while unfocused or hidden
     ignoreGpuBlocklist: true, //* Keep the canvas GPU accelerated on drivers Chromium blocklists
     highPerformanceGpu: true, //* Use the dedicated GPU on laptops with two

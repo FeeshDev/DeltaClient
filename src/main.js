@@ -51,10 +51,15 @@ const saveSettings = () => {
 #####################################
 */
 
+//* Bump to reset options whose default changed. 1: uncapFps now defaults to false
+const performanceVersion = 1;
+if ((settings.performanceVersion ?? 0) < 1) delete settings.performance?.uncapFps;
+
 //* Write any missing options back so players can find and edit them in settings.json
 const performance = { ...defaultPerformance, ...settings.performance };
-if (JSON.stringify(performance) !== JSON.stringify(settings.performance)) {
+if (JSON.stringify(performance) !== JSON.stringify(settings.performance) || settings.performanceVersion !== performanceVersion) {
     settings.performance = performance;
+    settings.performanceVersion = performanceVersion;
     saveSettings();
 }
 
